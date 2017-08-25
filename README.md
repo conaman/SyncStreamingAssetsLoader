@@ -8,3 +8,6 @@ So, I've made the sync loader. Use this!
 3) Load streaming assets files.
 
 You can see my sample code from Sample.cs
+
+External Modules
+- ICSharpCode.SharpZipLib.dll
