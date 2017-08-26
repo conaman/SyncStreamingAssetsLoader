@@ -1,7 +1,7 @@
 # SyncStreamingAssetsLoader
 
 If you want to load files from StreamingAssets path in Unity, You can only load from WWW class in Android device.
-So, I've made the sync loader. Use this!
+So, I've made the sync loader.
 
 1) Instantiate SyncStreamingAssetsLoader;
 2) Invoke Init function
