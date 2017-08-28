@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine;
 
 public class SyncStreamingAssetsLoader {
+#if !UNITY_EDITOR && UNITY_ANDROID
 	private struct Entry {
 		public Entry(long index, long size) {
 			this.index = index;
@@ -14,25 +15,37 @@ public class SyncStreamingAssetsLoader {
 		public long size;
 	}
 
-#if !UNITY_EDITOR && UNITY_ANDROID
 	private Dictionary<string, Entry> _entries = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
+	private FileStream _fs = null;
+	private ZipFile _zipFile = null;
 #endif
 
 	public void Init() {
 #if !UNITY_EDITOR && UNITY_ANDROID
 		_entries.Clear();
 
-		using (FileStream fs = File.OpenRead(Application.dataPath)) {
-			using (ZipFile zipFile = new ZipFile(fs)) {
-				var e = zipFile.GetEnumerator();
-				while (e.MoveNext()) {
-					ZipEntry zipEntry = e.Current as ZipEntry;
+		_fs = File.OpenRead(Application.dataPath);
+		_zipFile = new ZipFile(_fs);
 
-					if (zipEntry.Name.StartsWith("assets/")) {
-						_entries.Add(zipEntry.Name, new Entry(zipEntry.ZipFileIndex, zipEntry.Size));
-					}
-				}
+		var e = _zipFile.GetEnumerator();
+		while (e.MoveNext()) {
+			ZipEntry zipEntry = e.Current as ZipEntry;
+
+			if (zipEntry.Name.StartsWith("assets/")) {
+				_entries.Add(zipEntry.Name, new Entry(zipEntry.ZipFileIndex, zipEntry.Size));
 			}
+		}
+#endif
+	}
+
+	public void Close() {
+#if !UNITY_EDITOR && UNITY_ANDROID
+		if (_zipFile != null) {
+			_zipFile.Close();
+		}
+
+		if (_fs != null) {
+			_fs.Close();
 		}
 #endif
 	}
@@ -48,13 +61,9 @@ public class SyncStreamingAssetsLoader {
 			return null;
 		}
 
-		using (FileStream fs = File.OpenRead(Application.dataPath)) {
-			using (ZipFile zipFile = new ZipFile(fs)) {
-				using (Stream s = zipFile.GetInputStream(entry.index)) {
-					bytes = new byte[entry.size];
-					s.Read(bytes, 0, (int)entry.size);					
-				}
-			}
+		using (Stream s = _zipFile.GetInputStream(entry.index)) {
+			bytes = new byte[entry.size];
+			s.Read(bytes, 0, (int)entry.size);					
 		}
 #else
 		string path = Path.Combine(Application.streamingAssetsPath, filePath);

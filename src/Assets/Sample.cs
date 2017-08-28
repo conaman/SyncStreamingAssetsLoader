@@ -7,14 +7,18 @@ using UnityEngine.UI;
 public class Sample : MonoBehaviour {
 	public Text textUi;
 
-	private SyncStreamingAssetsLoader streamingAssetsLoader = new SyncStreamingAssetsLoader();
+	private SyncStreamingAssetsLoader _streamingAssetsLoader = new SyncStreamingAssetsLoader();
 
 	private void Start() {
-		streamingAssetsLoader.Init();
+		_streamingAssetsLoader.Init();
 
-		byte[] bytes = streamingAssetsLoader.Load("Test.txt");
+		byte[] bytes = _streamingAssetsLoader.Load("Test.txt");
 		if (bytes != null) {
 			textUi.text = Encoding.UTF8.GetString(bytes);
 		}
+	}
+
+	private void OnDestroy() {
+		_streamingAssetsLoader.Close();
 	}
 }

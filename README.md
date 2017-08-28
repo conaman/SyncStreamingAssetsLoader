@@ -6,6 +6,7 @@ So, I've made the sync loader.
 1) Instantiate SyncStreamingAssetsLoader;
 2) Invoke Init function
 3) Load streaming assets files.
+4) Invoke Close function when finish your app.
 
 You can see my sample code from Sample.cs
 
